@@ -35,6 +35,8 @@ Phạm vi Sprint 1:
 
 Chi tiết Sprint 1, T-01 → T-15, phân công và tiêu chí hoàn thành: [docs/SPRINT-1.md](docs/SPRINT-1.md).
 
+**Thành viên mới bắt đầu từ đây:** [docs/TEAM-GUIDE.md](docs/TEAM-GUIDE.md) — hướng dẫn clone repo, checkout branch, code, commit, push, tạo PR, review và merge.
+
 ## Cấu trúc repository
 
 ```text
