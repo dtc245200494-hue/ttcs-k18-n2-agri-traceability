@@ -1,21 +1,38 @@
 # TTCS K18 N2 - Agri Traceability
 
-Hệ thống truy xuất nguồn gốc và giám sát chuỗi lạnh nông sản của nhóm **TTCS_T926_K18C4_N2**.
+Hệ thống **truy xuất nguồn gốc và giám sát chuỗi lạnh nông sản** của nhóm **TTCS_T926_K18C4_N2**.
+
+> Nguồn chuẩn cho kế hoạch Sprint/Backlog: file `Truy xuất nguồn gốc và giám sát chuỗi lạnh nông sản.xlsx`. Jira dùng để theo dõi tiến độ thực thi; tài liệu trong repo phải bám theo backlog này.
+
+## Product Goal
+
+Chuỗi cung ứng nông sản truy được nguồn gốc từng lô từ vườn tới tay người mua, phát hiện được vi phạm chuỗi lạnh, và khi có sự cố thì chỉ ra đúng và đủ mọi lô hàng liên quan trong vòng vài phút thay vì vài ngày.
 
 ## Sprint 1
 
-**Sprint Goal:** Vùng trồng khai báo được thửa đất của mình và ghi nhận được lô thu hoạch đầu tiên.
+**Sprint Goal:** Vùng trồng khai báo được thửa đất của mình trên môi trường staging chạy thật, và mọi thay đổi mã đều đi qua CI.
 
-Phạm vi Sprint 1:
-- Chạy được trên máy cá nhân.
-- Setup khung Backend và Frontend.
-- Thiết kế cơ sở dữ liệu trong phạm vi Sprint 1.
-- Đăng nhập và phân quyền cơ bản.
-- Thêm, sửa, xem danh sách thửa đất.
-- Ghi nhận và xem lại lô thu hoạch đầu tiên.
-- Chuẩn bị kịch bản demo cuối sprint.
+**Capacity:** 12 SP — **Đã xếp:** 12 SP.
 
-> Sprint 1 chưa cần staging hoặc CI/CD và chưa triển khai các nghiệp vụ phức tạp như chuỗi hash, tách/gộp lô, thu hồi hay giám sát chuỗi lạnh.
+| ID | Nội dung | SP |
+| --- | --- | ---: |
+| S-01 | Khung ứng dụng chạy được trên máy cá nhân bằng một lệnh | 2 |
+| S-02 | Pipeline CI chặn merge khi build, lint hoặc test đỏ | 1 |
+| S-03 | Merge vào nhánh chính thì staging tự cập nhật | 2 |
+| K-01 | Chọn cách chống sửa lén bản ghi sự kiện | 2 |
+| S-04 | Đăng nhập bằng email và mật khẩu, khoá tạm sau 5 lần sai | 2 |
+| S-05 | Mỗi tổ chức chỉ thấy dữ liệu của chính mình | 2 |
+| S-06 | Vùng trồng khai báo thửa đất của mình | 1 |
+| **Tổng** |  | **12** |
+
+Chi tiết 15 task của Sprint 1 nằm tại [docs/SPRINT-1.md](docs/SPRINT-1.md).
+
+### Lưu ý phạm vi
+
+- **CI/CD và staging là bắt buộc ngay trong Sprint 1** theo E-01, S-02 và S-03.
+- `S-08 — Ghi nhận lô thu hoạch với mã lô sinh tự động` thuộc **Sprint 2**, không phải Sprint 1.
+- `K-01` là Spike: so sánh chuỗi hash trong bảng thường, quyền DB chống sửa/xoá và blockchain; đầu ra là tài liệu lựa chọn kỹ thuật. Không viết mã sản phẩm trong Spike.
+- File backlog **không chỉ định stack cụ thể**. T-01 yêu cầu khởi tạo dự án theo stack team chọn, nhưng bắt buộc có ứng dụng + PostgreSQL chạy bằng Docker Compose và có `.env.example`.
 
 ## Cấu trúc repository
 
@@ -31,31 +48,31 @@ Phạm vi Sprint 1:
 
 Không code trực tiếp lên `main`.
 
-Luồng làm việc:
+Luồng làm việc của nhóm:
 
 ```text
 feature/... -> develop -> main
 ```
 
 Quy ước branch:
+
 - `feature/N2-<issue>-<short-name>`
 - `fix/N2-<issue>-<short-name>`
 - `docs/<short-name>`
 
-Ví dụ:
-- `feature/N2-1-project-setup`
-- `feature/N2-2-database-schema`
-- `feature/N2-3-login`
-- `feature/N2-4-land-management`
-
 Quy trình:
-1. Pull branch `develop` mới nhất.
-2. Tạo branch riêng cho task.
-3. Commit rõ nội dung thay đổi.
+
+1. Cập nhật `develop`.
+2. Tạo branch riêng cho task Jira.
+3. Code và commit trong đúng phạm vi task.
 4. Push branch lên GitHub.
-5. Tạo Pull Request vào `develop`.
-6. Có người review trước khi merge.
-7. Cuối Sprint, khi bản tích hợp ổn định, tạo Pull Request từ `develop` vào `main`.
+5. Mở Pull Request vào `develop`.
+6. CI phải chạy build, lint, typecheck và test; PR phải được ít nhất một thành viên khác review.
+7. Khi bản tích hợp của Sprint ổn định, mở PR `develop -> main`.
+8. `main` phải chặn push trực tiếp; PR vào `main` chỉ merge khi CI xanh và có ít nhất một người duyệt.
+9. Merge vào `main` phải kích hoạt triển khai staging theo S-03.
+
+Xem thêm [docs/WORKFLOW.md](docs/WORKFLOW.md).
 
 ## Commit convention
 
@@ -70,27 +87,30 @@ test: ...
 chore: ...
 ```
 
-Ví dụ:
+Nên gắn Jira key khi có thể, ví dụ:
 
 ```text
-feat: add land plot creation API
-fix: validate harvest lot date
-docs: update local setup guide
+feat(N2-60): initialize app and PostgreSQL with docker compose
 ```
 
-## Definition of Done cơ bản
+## Definition of Done
 
-Một task được coi là xong khi:
-- Đáp ứng đúng yêu cầu/Acceptance Criteria.
-- Chạy được trên máy local.
-- Không làm hỏng chức năng đã có.
-- Đã push code và tạo Pull Request.
-- Pull Request đã được review.
-- Có thể demo được nếu task thuộc luồng nghiệp vụ Sprint.
+Theo file backlog:
+
+- Code review đã duyệt bởi ít nhất một thành viên khác.
+- Có unit test cho nhánh logic mới; độ phủ trên phần thay đổi không giảm.
+- CI xanh: build, lint, typecheck, test.
+- Không có secret trong mã nguồn; quét phụ thuộc sạch.
+- Acceptance Criteria pass trên môi trường staging, không chỉ trên máy cá nhân.
+- Story chạm sự kiện của lô: kiểm tra toàn vẹn chuỗi vẫn hợp lệ sau khi chạy.
+- Story chạm đồ thị phả hệ: có ca kiểm thử với bộ dữ liệu mẫu có đáp án đếm tay và ca chu trình.
+- Story chạm khối lượng: có test hai giao dịch đồng thời.
+- Không log dữ liệu định danh nông hộ.
+- README được cập nhật nếu đổi hành vi công khai hoặc thêm biến môi trường.
 
 ## Team workflow
 
-- Jira là nơi quản lý Sprint, task, assignee và tiến độ.
-- GitHub là nơi quản lý source code, branch, commit và Pull Request.
-- Daily: hôm qua làm gì, hôm nay làm gì, đang vướng gì.
-- Nếu bị block, báo sớm trên kênh nhóm thay vì chờ đến cuối Sprint.
+- Jira: Sprint, backlog, task, assignee và tiến độ.
+- GitHub: source code, branch, commit, Pull Request và CI/CD.
+- Daily Scrum: hôm qua làm gì, hôm nay làm gì, đang vướng gì.
+- Nếu bị block, báo sớm trên kênh nhóm.
