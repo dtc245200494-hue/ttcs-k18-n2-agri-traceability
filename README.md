@@ -4,18 +4,20 @@ Hệ thống truy xuất nguồn gốc và giám sát chuỗi lạnh nông sản
 
 ## Sprint 1
 
-**Sprint Goal:** Vùng trồng khai báo được thửa đất của mình và ghi nhận được lô thu hoạch đầu tiên.
+**Sprint Goal:** Vùng trồng khai báo được thửa đất của mình trên môi trường staging chạy thật, và mọi thay đổi mã đều đi qua CI.
+
+**Capacity:** 12 SP.
 
 Phạm vi Sprint 1:
-- Chạy được trên máy cá nhân.
-- Setup khung Backend và Frontend.
-- Thiết kế cơ sở dữ liệu trong phạm vi Sprint 1.
-- Đăng nhập và phân quyền cơ bản.
-- Thêm, sửa, xem danh sách thửa đất.
-- Ghi nhận và xem lại lô thu hoạch đầu tiên.
-- Chuẩn bị kịch bản demo cuối sprint.
+- S-01: Khung ứng dụng chạy được trên máy cá nhân bằng một lệnh.
+- S-02: Pipeline CI chặn merge khi build, lint hoặc test đỏ.
+- S-03: Merge vào nhánh chính thì staging tự cập nhật.
+- K-01: Chọn cách chống sửa lén bản ghi sự kiện.
+- S-04: Đăng nhập bằng email và mật khẩu, khoá tạm sau 5 lần sai.
+- S-05: Mỗi tổ chức chỉ thấy dữ liệu của chính mình.
+- S-06: Vùng trồng khai báo thửa đất của mình.
 
-> Sprint 1 chưa cần staging hoặc CI/CD và chưa triển khai các nghiệp vụ phức tạp như chuỗi hash, tách/gộp lô, thu hồi hay giám sát chuỗi lạnh.
+Chi tiết Story, Task, người phụ trách và branch xem tại [docs/SPRINT-1.md](docs/SPRINT-1.md).
 
 ## Cấu trúc repository
 
@@ -29,33 +31,51 @@ Phạm vi Sprint 1:
 
 ## Git workflow
 
-Không code trực tiếp lên `main`.
+Không code trực tiếp lên `main` hoặc `develop`.
 
 Luồng làm việc:
 
 ```text
-feature/... -> develop -> main
+Story branch -> develop -> main
 ```
 
-Quy ước branch:
-- `feature/N2-<issue>-<short-name>`
-- `fix/N2-<issue>-<short-name>`
-- `docs/<short-name>`
+### Quy ước branch
+
+- `feature/s<sprint>-s<story>-<short-name>`: Story phát triển chức năng.
+- `fix/s<sprint>-s<story>-<short-name>`: sửa lỗi của Story.
+- `docs/s<sprint>-k<spike>-<short-name>`: tài liệu/spike.
+- `docs/s<sprint>-<short-name>`: tài liệu quản lý Sprint.
 
 Ví dụ:
-- `feature/N2-1-project-setup`
-- `feature/N2-2-database-schema`
-- `feature/N2-3-login`
-- `feature/N2-4-land-management`
 
-Quy trình:
-1. Pull branch `develop` mới nhất.
-2. Tạo branch riêng cho task.
-3. Commit rõ nội dung thay đổi.
+```text
+feature/s1-s01-app-setup
+feature/s1-s02-ci
+feature/s1-s04-login
+docs/s1-k01-integrity
+```
+
+**Branch được đặt theo Sprint + Story, không đặt theo tên thành viên.** Người phụ trách được quản lý trong Jira và tài liệu phân công. Nếu một Story có nhiều Task, các Task cùng làm trên branch của Story và ghi mã Task trong commit.
+
+Ví dụ S-02 có T-03 và T-04:
+
+```text
+branch: feature/s1-s02-ci
+
+feat: T-03 configure CI build lint test
+chore: T-04 configure branch protection
+```
+
+### Quy trình
+
+1. Cập nhật `develop` mới nhất.
+2. Chuyển sang branch Story được giao và đồng bộ branch đó với `develop`.
+3. Code theo Task; commit ghi rõ mã Task và nội dung thay đổi.
 4. Push branch lên GitHub.
-5. Tạo Pull Request vào `develop`.
-6. Có người review trước khi merge.
-7. Cuối Sprint, khi bản tích hợp ổn định, tạo Pull Request từ `develop` vào `main`.
+5. Tạo Pull Request từ Story branch vào `develop`.
+6. Có ít nhất một thành viên khác review trước khi merge.
+7. Chỉ merge khi CI xanh và Acceptance Criteria đạt.
+8. Cuối Sprint, khi bản tích hợp ổn định, tạo Pull Request từ `develop` vào `main`.
 
 ## Commit convention
 
@@ -70,27 +90,31 @@ test: ...
 chore: ...
 ```
 
-Ví dụ:
+Ưu tiên thêm mã Task ở đầu nội dung:
 
 ```text
-feat: add land plot creation API
-fix: validate harvest lot date
-docs: update local setup guide
+feat: T-09 add login session
+test: T-13 reject cross-organization access
+docs: K-01 document event-integrity decision
 ```
 
-## Definition of Done cơ bản
+## Definition of Done
 
-Một task được coi là xong khi:
-- Đáp ứng đúng yêu cầu/Acceptance Criteria.
-- Chạy được trên máy local.
-- Không làm hỏng chức năng đã có.
-- Đã push code và tạo Pull Request.
-- Pull Request đã được review.
-- Có thể demo được nếu task thuộc luồng nghiệp vụ Sprint.
+Một Story/Task chỉ được coi là Done khi các mục áp dụng đều đạt:
+
+- Acceptance Criteria đạt trên **staging**, không chỉ trên máy cá nhân.
+- Code review được duyệt bởi ít nhất một thành viên khác.
+- Có unit/integration test phù hợp cho logic mới.
+- CI xanh: build, lint, typecheck, test.
+- Không có secret trong mã nguồn; quét phụ thuộc sạch.
+- Không log dữ liệu định danh nông hộ.
+- README/tài liệu được cập nhật nếu đổi hành vi công khai hoặc biến môi trường.
+- Các kiểm thử đặc thù về integrity/graph/concurrency phải có khi Story liên quan.
 
 ## Team workflow
 
-- Jira là nơi quản lý Sprint, task, assignee và tiến độ.
-- GitHub là nơi quản lý source code, branch, commit và Pull Request.
-- Daily: hôm qua làm gì, hôm nay làm gì, đang vướng gì.
-- Nếu bị block, báo sớm trên kênh nhóm thay vì chờ đến cuối Sprint.
+- **Jira:** Sprint, Story/Task, assignee, trạng thái và tiến độ.
+- **GitHub:** source code, branch, commit, Pull Request và review.
+- **Scrum Master:** theo dõi Jira, branch, PR, CI, blocker và dependency; không thay người thực hiện.
+- Daily Scrum: hôm qua làm gì, hôm nay làm gì, đang vướng gì.
+- Nếu bị block, báo sớm thay vì chờ đến cuối Sprint.
