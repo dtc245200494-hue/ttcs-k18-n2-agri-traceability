@@ -63,23 +63,56 @@ feat: T-02 add initial migration and setup guide
 
 Không tạo branch `T-01`, `T-02` riêng nếu các Task cùng thuộc một Story.
 
-## 4. Bắt đầu làm một Story
+## 4. Lấy dự án về máy và bắt đầu làm Story
+
+### 4.1. Thành viên clone repo lần đầu
+
+Mỗi thành viên clone **toàn bộ repository** về máy. Sau đó chỉ checkout đúng Story branch được giao để làm việc.
+
+```bash
+git clone https://github.com/ttcs-k18-n2/agri-trace-coldchain-t926-k18c4-n2.git
+cd agri-trace-coldchain-t926-k18c4-n2
+git fetch origin
+git checkout -b <story-branch> origin/<story-branch>
+```
+
+Ví dụ người được giao S-04:
+
+```bash
+git clone https://github.com/ttcs-k18-n2/agri-trace-coldchain-t926-k18c4-n2.git
+cd agri-trace-coldchain-t926-k18c4-n2
+git fetch origin
+git checkout -b feature/s1-s04-login origin/feature/s1-s04-login
+```
+
+Kiểm tra đang đứng đúng branch:
+
+```bash
+git branch
+```
+
+Dòng có dấu `*` phải là Story branch được giao.
+
+### 4.2. Đồng bộ code mới từ `develop`
+
+Trước khi bắt đầu hoặc tiếp tục một Story:
 
 ```bash
 git fetch origin
-git checkout develop
-git pull origin develop
 git checkout <story-branch>
+git pull origin <story-branch>
 git merge origin/develop
 ```
 
-Nếu branch chưa có ở local:
+Nhờ vậy thành viên vẫn nhận được phần code mới đã được các Story khác merge vào `develop`, nhưng commit tiếp theo trên Story branch chỉ ghi nhận những thay đổi mà thành viên thực sự sửa.
+
+Nếu branch chưa có ở local nhưng đã tồn tại trên GitHub:
 
 ```bash
 git checkout -b <story-branch> origin/<story-branch>
 ```
 
-Không tạo lại branch đã tồn tại trên GitHub.
+Không tạo branch mới theo tên cá nhân hoặc Task nếu Story branch chính thức đã tồn tại trên GitHub. Không code trực tiếp trên `develop` hoặc `main`.
 
 ## 5. Commit và push
 
