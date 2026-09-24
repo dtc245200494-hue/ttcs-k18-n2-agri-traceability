@@ -15,7 +15,7 @@ Phạm vi Sprint 1:
 - Ghi nhận và xem lại lô thu hoạch đầu tiên.
 - Chuẩn bị kịch bản demo cuối sprint.
 
-> Sprint 1 chưa cần staging hoặc CI/CD và chưa triển khai các nghiệp vụ phức tạp như chuỗi hash, tách/gộp lô, thu hồi hay giám sát chuỗi lạnh.
+
 
 ## Cấu trúc repository
 
