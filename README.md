@@ -37,13 +37,81 @@ Chi tiết Sprint 1, T-01 → T-15, phân công và tiêu chí hoàn thành: [do
 
 **Thành viên mới bắt đầu từ đây:** [docs/TEAM-GUIDE.md](docs/TEAM-GUIDE.md) — hướng dẫn clone repo, checkout branch, code, commit, push, tạo PR, review và merge.
 
+
+## S-01 — Chạy ứng dụng local bằng một lệnh
+
+### Yêu cầu
+
+- Git.
+- Docker Desktop hoặc Docker Engine có Docker Compose.
+
+### Khởi động lần đầu
+
+Linux/macOS:
+
+```bash
+git clone https://github.com/ttcs-k18-n2/agri-trace-coldchain-t926-k18c4-n2.git
+cd agri-trace-coldchain-t926-k18c4-n2
+git checkout feature/s1-s01-app-setup
+cp .env.example .env
+docker compose up --build
+```
+
+Windows PowerShell:
+
+```powershell
+git clone https://github.com/ttcs-k18-n2/agri-trace-coldchain-t926-k18c4-n2.git
+cd agri-trace-coldchain-t926-k18c4-n2
+git checkout feature/s1-s01-app-setup
+Copy-Item .env.example .env
+docker compose up --build
+```
+
+Sau khi container sẵn sàng:
+
+- Frontend: http://localhost:8080
+- Backend: http://localhost:3000
+- Health check: http://localhost:3000/health
+- PostgreSQL: localhost:5432
+
+Khi hệ thống hoạt động bình thường, `GET /health` trả `status: ok` và `database: connected`.
+
+### Migration
+
+Migration đầu tiên nằm tại `db/migrations/001_init.sql` và được PostgreSQL chạy khi volume database được tạo lần đầu.
+
+Chạy lại migration từ đầu:
+
+```bash
+docker compose down -v
+docker compose up --build
+```
+
+Dừng ứng dụng:
+
+```bash
+docker compose down
+```
+
 ## Cấu trúc repository
 
 ```text
 .
-├── backend/      # Source code Backend
-├── frontend/     # Source code Frontend
-├── docs/         # Tài liệu dự án
+├── backend/
+│   ├── src/
+│   │   └── index.js
+│   ├── Dockerfile
+│   └── package.json
+├── frontend/
+│   ├── Dockerfile
+│   ├── index.html
+│   └── nginx.conf
+├── db/
+│   └── migrations/
+│       └── 001_init.sql
+├── docs/
+├── .env.example
+├── docker-compose.yml
 └── README.md
 ```
 
