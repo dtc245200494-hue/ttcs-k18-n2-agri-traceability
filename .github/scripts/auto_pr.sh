@@ -38,20 +38,19 @@ BODY="## 🚀 Đề xuất gộp nhánh \`$BRANCH_NAME\` vào \`develop\`
 
 > ℹ️ *Pull Request này được hệ thống tự động khởi tạo khi có commit đẩy lên nhánh. Thành viên có thể tiếp tục push code lên nhánh này, GitHub sẽ tự động cập nhật vào PR này mà không tạo mới.*"
 
-# 3. Tạo PR và tự động gán reviewer dtc245200494-hue
+# 3. Tạo PR và tự động gán reviewer dtc245200494-hue (bắt lỗi nếu đã tồn tại)
+CREATE_ARGS=(--base develop --head "$BRANCH_NAME" --title "$TITLE" --body "$BODY")
 if [ "$ACTOR" != "dtc245200494-hue" ]; then
-  gh pr create \
-    --base develop \
-    --head "$BRANCH_NAME" \
-    --title "$TITLE" \
-    --body "$BODY" \
-    --reviewer "dtc245200494-hue"
-else
-  gh pr create \
-    --base develop \
-    --head "$BRANCH_NAME" \
-    --title "$TITLE" \
-    --body "$BODY"
+  CREATE_ARGS+=(--reviewer "dtc245200494-hue")
 fi
 
-echo "Created Pull Request successfully!"
+if OUTPUT=$(gh pr create "${CREATE_ARGS[@]}" 2>&1); then
+  echo "$OUTPUT"
+  echo "Created Pull Request successfully!"
+elif echo "$OUTPUT" | grep -qi "already exists"; then
+  echo "Pull Request already exists: $OUTPUT"
+  exit 0
+else
+  echo "$OUTPUT" >&2
+  exit 1
+fi
