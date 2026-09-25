@@ -1,0 +1,63 @@
+name: Auto Integrate Feature Branches
+
+on:
+  push:
+    branches:
+      - "feature/**"
+      - "fix/**"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: develop-auto-integration
+  cancel-in-progress: false
+
+jobs:
+  verify-and-integrate:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout pushed branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare environment
+        shell: bash
+        run: |
+          if [ -f .env.example ] && [ ! -f .env ]; then
+            cp .env.example .env
+          fi
+
+      - name: Validate backend
+        if: ${{ hashFiles('backend/package.json') != '' }}
+        shell: bash
+        run: |
+          npm install --prefix backend
+          npm run check --prefix backend
+
+      - name: Validate Docker Compose
+        if: ${{ hashFiles('docker-compose.yml') != '' }}
+        shell: bash
+        run: docker compose config
+
+      - name: Integrate into develop
+        shell: bash
+        env:
+          PUSHED_SHA: ${{ github.sha }}
+          PUSHED_BRANCH: ${{ github.ref_name }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git fetch origin develop
+          git checkout -B develop origin/develop
+
+          if git merge-base --is-ancestor "$PUSHED_SHA" develop; then
+            echo "$PUSHED_BRANCH is already integrated into develop."
+            exit 0
+          fi
+
+          git merge --no-ff "$PUSHED_SHA" -m "auto: integrate $PUSHED_BRANCH into develop"
+          git push origin HEAD:develop
