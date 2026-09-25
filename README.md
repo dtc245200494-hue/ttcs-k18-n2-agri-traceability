@@ -166,6 +166,22 @@ chore: T-04 configure branch protection
 
 Chi tiết thao tác Git/PR: [docs/WORKFLOW.md](docs/WORKFLOW.md).
 
+### Cơ chế bảo vệ nhánh chính và chặn merge (S-02 / T-04)
+
+Theo tiêu chí Sprint 1 (**S-02: Pipeline CI chặn merge khi build, lint hoặc test đỏ**), nhánh chính `main` được bảo vệ nghiêm ngặt bằng GitHub Ruleset:
+
+1. **Cấm push thẳng lên `main`:**
+   - Mọi thao tác `git push origin <branch>:main` đều bị từ chối trực tiếp từ server.
+2. **Bắt buộc CI xanh (Required Status Checks):**
+   - Mọi Pull Request vào `main` bắt buộc phải vượt qua cả 3 jobs kiểm tra độc lập chạy song song:
+     - `build`: Kiểm tra cấu hình Docker Compose và build image sạch.
+     - `lint`: Kiểm tra cú pháp và code style backend (`npm run lint`).
+     - `test`: Chạy bộ unit test tự động (`npm test`).
+   - Nếu bất kỳ bước nào thất bại (đỏ), GitHub sẽ **khóa nút Merge** và đánh dấu PR ở trạng thái thất bại.
+3. **Bắt buộc có Review:**
+   - Yêu cầu ít nhất **1 người khác duyệt (Approve)**. Người tạo PR không được tự duyệt cho chính mình.
+   - Bắt buộc giải quyết xong tất cả các thread thảo luận/nhận xét trước khi merge.
+
 ## Commit convention
 
 ```text
