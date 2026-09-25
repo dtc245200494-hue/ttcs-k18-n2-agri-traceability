@@ -7,78 +7,20 @@ on:
       - "fix/**"
       - "docs/**"
 
-permissions:
-  contents: read
-  pull-requests: write
-
 jobs:
-  auto-create-pr:
-    name: Auto Create Pull Request
+  open-pr:
+    name: Auto Open PR
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Check and create Pull Request
-        shell: bash
+      - name: Execute Auto PR Script
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           BRANCH_NAME: ${{ github.ref_name }}
           ACTOR: ${{ github.actor }}
-          COMMIT_MSG: ${{ github.event.head_commit.message }}
-        run: |
-          echo "Processing push on branch: $BRANCH_NAME by $ACTOR"
-
-          # 1. Kiểm tra xem đã có PR nào từ nhánh này vào develop đang mở hay chưa
-          EXISTING_PR=$(gh pr list --head "$BRANCH_NAME" --base develop --state open --json number --jq '.[0].number')
-
-          if [ -n "$EXISTING_PR" ]; then
-            echo "Pull Request #$EXISTING_PR already exists for $BRANCH_NAME -> develop."
-            echo "GitHub automatically attaches newly pushed commits to the existing PR."
-            exit 0
-          fi
-
-          echo "No open PR found for $BRANCH_NAME -> develop. Creating a new Pull Request..."
-
-          # 2. Tạo tiêu đề PR rõ ràng
-          # Nhận diện mã Story (ví dụ S-01, S-04, K-01) từ tên branch
-          TAG=$(echo "$BRANCH_NAME" | grep -o -iE '[sk][0-9]+' | tr '[:lower:]' '[:upper:]' | tail -n 1)
-          if [ -n "$TAG" ]; then
-            TITLE="[$TAG] Đề xuất gộp $BRANCH_NAME vào develop"
-          else
-            TITLE="Đề xuất gộp $BRANCH_NAME vào develop"
-          fi
-
-          # 3. Tạo nội dung PR chi tiết
-          BODY="## 🚀 Đề xuất gộp nhánh \`$BRANCH_NAME\` vào \`develop\`
-
-- **Nhánh nguồn:** \`$BRANCH_NAME\`
-- **Nhánh đích:** \`develop\`
-- **Người thực hiện:** @$ACTOR
-- **Người duyệt:** @dtc245200494-hue
-- **Commit mới nhất:** \`$COMMIT_MSG\`
-
----
-### 📋 Trạng thái kiểm tra
-- [ ] Pipeline CI (\`build\`, \`lint\`, \`test\`) báo xanh \`✅\`
-- [ ] Reviewer (@dtc245200494-hue) đã kiểm tra code và bấm **Approve**
-
-> ℹ️ *Pull Request này được hệ thống tự động khởi tạo khi có commit đẩy lên nhánh. Thành viên có thể tiếp tục push code lên nhánh này, GitHub sẽ tự động cập nhật vào PR này mà không tạo mới.*"
-
-          # 4. Tạo PR và tự động gán reviewer dtc245200494-hue
-          if [ "$ACTOR" != "dtc245200494-hue" ]; then
-            gh pr create \
-              --base develop \
-              --head "$BRANCH_NAME" \
-              --title "$TITLE" \
-              --body "$BODY" \
-              --reviewer "dtc245200494-hue"
-          else
-            gh pr create \
-              --base develop \
-              --head "$BRANCH_NAME" \
-              --title "$TITLE" \
-              --body "$BODY"
-          fi
-
-          echo "Pull Request created successfully and reviewer assigned!"
+        run: bash .github/scripts/auto_pr.sh
