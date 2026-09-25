@@ -1,13 +1,15 @@
-name: Auto PR
+name: Auto Open PR to Develop
 
 on:
   push:
     branches:
       - "feature/**"
       - "fix/**"
+      - "docs/**"
 
 jobs:
   open-pr:
+    name: Auto Open PR
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -16,8 +18,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Create PR if missing
+      - name: Execute Auto PR Script
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          echo "Hello from auto-pr"
+          BRANCH_NAME: ${{ github.ref_name }}
+          ACTOR: ${{ github.actor }}
+        run: bash .github/scripts/auto_pr.sh
